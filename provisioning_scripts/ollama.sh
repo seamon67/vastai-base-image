@@ -67,8 +67,10 @@ ollama pull seamon67/Magidonia-4.2:24b-q8_0
 ollama pull seamon67/Gemma3-Tiger:27b-q8_0
 ollama pull seamon67/Skyfall-4.1:31b-q8_0
 ollama pull gemma3:27b-it-q8_0
-ollama pull qwen3-vl:32b-thinking-q8_0
+ollama pull seamon67/Devstral1.1-2507:24b-q8_0
+ollama pull seamon67/Devstral1.1-Fused:36b-q8_0
 ollama pull seamon67/Magistral1.2-2509:24b-q8_0
+ollama pull qwen3-vl:32b-thinking-q8_0
 ollama pull gpt-oss:120b
 
 FAIL_STRINGS=(
