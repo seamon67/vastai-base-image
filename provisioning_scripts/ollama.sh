@@ -65,7 +65,7 @@ done
 #ollama run ${OLLAMA_ARGS:-} ${OLLAMA_MODEL:-qwen3:8b} > /dev/null 2>&1 &
 ollama pull seamon67/Skyfall-4.1:31b-q8_0
 ollama pull seamon67/Qwen3-VL:32b-thinking-q8_0
-ollama pull seamon67/Magidonia-4.2:24b-q8_0
+ollama pull seamon67/Magidonia:24b-q8_0
 ollama pull seamon67/Gemma3-Tiger:27b-q8_0
 ollama pull gemma3:27b-it-q8_0
 ollama pull seamon67/Devstral1.1-2507:24b-q8_0
