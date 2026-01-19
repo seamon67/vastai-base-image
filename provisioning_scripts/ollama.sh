@@ -69,7 +69,6 @@ ollama pull seamon67/Magidonia:24b-q8_0
 ollama pull seamon67/Gemma3-Tiger:27b-q8_0
 ollama pull gemma3:27b-it-q8_0
 ollama pull seamon67/Devstral2-Small:24b-q8_0
-ollama pull seamon67/Devstral1.1-Fused:36b-q8_0
 ollama pull seamon67/Magistral1.2-2509:24b-q8_0
 ollama pull gpt-oss:120b
 
