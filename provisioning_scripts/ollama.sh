@@ -63,14 +63,16 @@ done
 
 # Use run because we can watch for load failures in the ollama serve log
 #ollama run ${OLLAMA_ARGS:-} ${OLLAMA_MODEL:-qwen3:8b} > /dev/null 2>&1 &
+ollama pull seamon67/Qwen3.5:122b
+ollama pull seamon67/Qwen3.5:122b-Coder
 ollama pull gpt-oss:120b
 ollama pull seamon67/Skyfall-4.1:31b-q8_0
-ollama pull seamon67/Qwen3-VL:32b-thinking-q8_0
+#ollama pull seamon67/Qwen3-VL:32b-thinking-q8_0
 ollama pull seamon67/Magidonia:24b-q8_0
-ollama pull seamon67/Gemma3-Tiger:27b-q8_0
+#ollama pull seamon67/Gemma3-Tiger:27b-q8_0
 ollama pull seamon67/Gemma3:27b-q8_0
-ollama pull seamon67/Devstral2-Small:24b-q8_0
-ollama pull seamon67/Magistral1.2-2509:24b-q8_0
+#ollama pull seamon67/Devstral2-Small:24b-q8_0
+#ollama pull seamon67/Magistral1.2-2509:24b-q8_0
 
 FAIL_STRINGS=(
     "Error: pull model manifest:"
