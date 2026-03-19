@@ -7,6 +7,8 @@ This template gives you a **hosted vLLM API server** running in a Docker contain
 
 **Think:** *"Your own private, high-performance ChatGPT API that you control completely."*
 
+> **Latest builds:** Docker images are automatically rebuilt when new vLLM releases are detected. The default template tag is updated less frequently to allow for QA testing. To use a newly built image before it becomes the template default, select a specific version from the **version tag dropdown** on the template configuration page.
+
 ---
 
 ## What can I do with this?
@@ -112,13 +114,19 @@ Once connected via SSH or Jupyter terminal:
 vllm chat --url http://localhost:18000/v1
 ```
 
+### **Model UI**
+A lightweight web chat interface is included for quick testing. Open it from the Instance Portal or access port 7860 directly.
+
+For serious use, we recommend connecting the OpenAI-compatible API (port 8000) to your preferred client — [Open WebUI](https://github.com/open-webui/open-webui), [SillyTavern](https://github.com/SillyTavern/SillyTavern), [oterm](https://github.com/ggozad/oterm), or any application that speaks the OpenAI API.
+
 ### **Port Reference**
 | Service | External Port | Internal Port |
 |---------|---------------|---------------|
 | Instance Portal | 1111 | 11111 |
+| Model UI | 7860 | 17860 |
 | vLLM API | 8000 | 18000 |
 | Ray Dashboard | 8265 | 28265 |
-| Jupyter | 8080 | 8080 |
+| Jupyter | 8080 | 18080 |
 
 ### **Instance Portal (Application Manager)**
 - Web-based dashboard for managing your applications
@@ -183,6 +191,16 @@ Example template on start:
 echo '--guided-decoding-backend lm-format-enforcer --chat-template-content-format string' > /etc/vllm-args.conf;
 entrypoint.sh
 ```
+
+---
+
+## CUDA Compatibility
+
+Images are tagged with the CUDA version they were built against (e.g. `v0.14.0-cuda-12.9`). This does not mean you need that exact CUDA version on the host.
+
+**Minor version compatibility:** NVIDIA guarantees that an application built with any CUDA toolkit within a major version family will run on a driver from the same family. A `cuda-12.9` image runs on any CUDA 12.x driver (driver >= 525), and a `cuda-13.0` image runs on any CUDA 13.x driver (driver >= 580). The 12.x and 13.x families are separate.
+
+**Forward compatibility:** All images include the [CUDA Compatibility Package](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html), which allows newer CUDA toolkit versions to run on older drivers. This is only available on **datacenter GPUs** (e.g., H100, A100, L40S, RTX Pro series) — for example, a `cuda-12.9` image can run on a datacenter host with a CUDA 12.1 driver. Consumer GPUs do not support forward compatibility and require a driver that natively supports the CUDA version.
 
 ---
 

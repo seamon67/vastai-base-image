@@ -41,14 +41,24 @@ echo '--guided-decoding-backend lm-format-enforcer --chat-template-content-forma
 entrypoint.sh
 ```
 
+### Model UI
+
+A lightweight web interface is included for quick interactions with your model. It supports chat with streaming, multimodal input (images, audio), and thinking/reasoning model output. Available on port 7860 (external) / 17860 (internal).
+
+Model UI is provided as a convenience for testing and casual use. For the best experience, connect the OpenAI-compatible API (port 8000) to your preferred local client — [Open WebUI](https://github.com/open-webui/open-webui), [SillyTavern](https://github.com/SillyTavern/SillyTavern), [oterm](https://github.com/ggozad/oterm), or any application that speaks the OpenAI API.
+
+- To disable, remove the Model UI entry from `PORTAL_CONFIG`
+- See [`tools/model-ui/README.md`](../../tools/model-ui/README.md) for capabilities configuration
+
 ### Port Reference
 
 | Service | External Port | Internal Port |
 |---------|---------------|---------------|
 | Instance Portal | 1111 | 11111 |
+| Model UI | 7860 | 17860 |
 | vLLM API | 8000 | 18000 |
 | Ray Dashboard | 8265 | 28265 |
-| Jupyter | 8080 | 8080 |
+| Jupyter | 8080 | 18080 |
 
 ### Interacting with vLLM
 
@@ -62,6 +72,28 @@ vllm chat --url http://localhost:18000/v1
 curl -H "Authorization: Bearer <OPEN_BUTTON_TOKEN>" \
      http://your-instance-ip:8000/v1/models
 ```
+
+## CUDA Compatibility
+
+Images are tagged with the CUDA version they were built against (e.g. `v0.14.0-cuda-12.9`). This does not mean you need that exact CUDA version on the host.
+
+### Minor Version Compatibility
+
+NVIDIA's [minor version compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html) guarantees that an application built with any CUDA toolkit release within a major version family will run on a system with a driver from the same major family. In practice:
+
+- A `cuda-12.9` image will run on any machine with a CUDA 12.x driver (driver >= 525).
+- A `cuda-13.0` image will run on any machine with a CUDA 13.x driver (driver >= 580).
+- The 12.x and 13.x families are separate — a `cuda-13.0` image will not work with a 12.x driver under minor version compatibility alone.
+
+**PTX caveat:** Applications that compile device code to PTX rather than pre-compiled SASS for the target architecture will not work on older drivers within the same major family.
+
+Choose the CUDA variant that matches your driver's major version. Within that family, any minor version will work.
+
+### Forward Compatibility
+
+[Forward compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html) allows newer CUDA toolkit versions to run on older drivers. It is only available on **datacenter GPUs** (and select NGC Server Ready RTX cards). All of our images include the CUDA Compatibility Package (`cuda-compat`) to support this.
+
+For example, with forward compatibility a `cuda-12.9` image could run on a datacenter machine with a CUDA 12.1 driver, or a `cuda-13.0` image could run with a CUDA 12.x driver. Consumer GPUs do not support forward compatibility and require a driver that natively supports the image's CUDA version.
 
 ## Building From Source
 
@@ -83,6 +115,60 @@ docker buildx build \
 |----------|---------|-------------|
 | `VLLM_BASE` | `vllm/vllm-openai:v0.13.0` | Official vLLM image to use as the base |
 | `VAST_BASE` | `vastai/base-image:stock-ubuntu24.04-py312` | Vast base image (used to copy Caddy binary) |
+
+## Building with GitHub Actions
+
+You can fork this repository and use the included GitHub Actions workflow to automatically build and push vLLM images to your own DockerHub account.
+
+### Setup
+
+1. Fork the [base-image](https://github.com/vast-ai/base-image) repository.
+2. In your fork, go to **Settings > Secrets and variables > Actions** and add the following repository secrets:
+
+   | Secret | Description |
+   |--------|-------------|
+   | `DOCKERHUB_USERNAME` | Your DockerHub username |
+   | `DOCKERHUB_TOKEN` | A DockerHub [access token](https://docs.docker.com/security/for-developers/access-tokens/) |
+   | `DOCKERHUB_NAMESPACE` | DockerHub namespace to push to (usually your username or org) |
+   | `SLACK_WEBHOOK_URL` | *(Optional)* Slack incoming webhook for build notifications |
+
+3. Enable Actions in your fork under **Settings > Actions > General**.
+
+### Triggering a Build
+
+Go to **Actions > Build vLLM Image > Run workflow** and fill in the inputs:
+
+| Input | Description |
+|-------|-------------|
+| `VLLM_VERSION` | A release tag (e.g. `v0.14.0`), `nightly`, or leave empty to auto-detect the latest release |
+| `DOCKERHUB_REPO` | Repository name under your namespace (default: `vllm`) |
+| `MULTI_ARCH` | Build for both `amd64` and `arm64` (default: `false`) |
+| `CUSTOM_IMAGE_TAG` | Override the version portion of the tag (e.g. `my-custom-build`) |
+
+The workflow pushes images tagged as `<namespace>/<repo>:<version>-cuda-<cuda_version>`:
+
+```
+yourusername/vllm:v0.14.0-cuda-12.9
+yourusername/vllm:v0.14.0-cuda-13.0
+```
+
+Nightly builds pull from the upstream `nightly` tag and are pushed as:
+
+```
+yourusername/vllm:nightly-2025-01-15-cuda-12.9
+```
+
+### Automatic Builds
+
+The workflow includes a 12-hour schedule that automatically builds new vLLM releases when detected on DockerHub. GitHub disables scheduled workflows on forks by default — to enable them, go to the **Actions** tab in your fork and confirm that you want to enable workflows. To disable scheduled builds, edit the `cron` line in `.github/workflows/build-vllm.yml` or remove the `schedule` trigger.
+
+### Customizing the Image
+
+To build a variant with modifications:
+
+1. Edit `external/vllm/Dockerfile` or the files under `external/vllm/ROOT/` in your fork.
+2. Trigger a manual build. Your changes will be included in the built image.
+3. Supervisor configuration lives in `ROOT/etc/supervisor/conf.d/vllm.conf` and the startup script in `ROOT/opt/supervisor-scripts/vllm.sh`.
 
 ## Useful Links
 
